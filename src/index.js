@@ -1,5 +1,3 @@
-/*global FB*/
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
@@ -15,7 +13,7 @@ ReactDOM.render(
         <div>
             <Link to="/about">About</Link>
             <Route path='/about' component={About} />
-            <Route exact={true} path='/' render={() => <App fb={FB} />} />
+            <Route exact={true} path='/' render={() => <App/>} />
         </div>
     </Router>,
     document.getElementById('root')

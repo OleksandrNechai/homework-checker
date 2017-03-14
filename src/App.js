@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
+import {Button} from 'react-bootstrap';
 // interesting SO reagarding implementation http://stackoverflow.com/questions/27717555/implement-facebook-api-login-with-reactjs/31859302;
 
 
-class Button extends React.Component {
-    render() {
-        return (<div className="fb-login-button" data-max-rows="1" data-size="xlarge" data-show-faces="false" data-auto-logout-link="true"></div>);
-    }
-}
+// class Button extends React.Component {
+//     render() {
+//         return (<div className="fb-login-button" data-max-rows="1" data-size="xlarge" data-show-faces="false" data-auto-logout-link="true"></div>);
+//     }
+// }
 
 class App extends Component {
 
@@ -39,7 +40,7 @@ class App extends Component {
         //http://stackoverflow.com/questions/32070227/reactjs-facebook-sdk-login-button-not-showing-up-the-second-time  
         return (
             <div>
-                <Button />
+                <Button bsStyle="primary" bsSize="large">Large button</Button>
             </div>
         );
     }

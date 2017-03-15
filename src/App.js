@@ -1,9 +1,28 @@
 /*global FB*/
 import React, { Component } from 'react';
 import { Button } from 'react-bootstrap';
+import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
+
 // interesting SO reagarding implementation http://stackoverflow.com/questions/27717555/implement-facebook-api-login-with-reactjs/31859302;
 
+const Login = ({ onClick }) => <Button bsStyle="primary" bsSize="large" onClick={onClick}>Login</Button>;
+class Main extends React.Component {
+    render() {
+        return (<div>
+            <h1>Wellcome!</h1>
+            <Button bsStyle="primary" bsSize="large" onClick={this.props.onLogout}>Logout</Button>
+        </div>);
+    }
+}
+
 class App extends Component {
+    constructor() {
+        super();
+        this.state = {
+            loggedIn: false,
+            loading: true
+        };
+    }
 
     pingServer() {
         this.props.fb.getLoginStatus((response) => {
@@ -88,14 +107,18 @@ class App extends Component {
         if (response.status === 'connected') {
             // Logged into your app and Facebook.
             this.testAPI();
+            this.setState({ loggedIn: true });
         } else if (response.status === 'not_authorized') {
             // The person is logged into Facebook, but not your app.
             console.log('Not authorized');
+            this.setState({ loggedIn: false });
         } else {
             // The person is not logged into Facebook, so we're not sure if
             // they are logged into this app or not.
             console.log('The person is not logged into Facebook. Please log into Facebook.');
+            this.setState({ loggedIn: false });
         }
+        this.setState({ loading: false });
     }
 
     // This function is called when someone finishes with the Login
@@ -106,16 +129,36 @@ class App extends Component {
     }
 
     handleClick() {
-        FB.login(this.checkLoginState());
+        FB.login(this.statusChangeCallback.bind(this));
+    }
+    handleLogout() {
+        FB.logout(r => this.setState({ loggedIn: false }));
     }
     //End of copy-paste
 
     render() {
-
         //http://stackoverflow.com/questions/32070227/reactjs-facebook-sdk-login-button-not-showing-up-the-second-time  
         return (
             <div>
-                <Button bsStyle="primary" bsSize="large" onClick={this.handleClick.bind(this)}>Login</Button>
+                {
+                    this.state.loading
+                        ? <h1>Loading...</h1>
+                        : <Router>
+                            <div>
+                                <Route exact={true} path='/' render={() => <Redirect to="/main" />} />
+                                <Route path='/login' render={() => (
+                                    this.state.loggedIn
+                                        ? <Redirect to="/main" />
+                                        : <Login onClick={this.handleClick.bind(this)} />)} />
+
+                                <Route path='/main' render={() => (
+                                    this.state.loggedIn
+                                        ? <Main onLogout={this.handleLogout.bind(this)} />
+                                        : <Redirect to="/login" />
+                                )} />
+                            </div>
+                        </Router>
+                }
             </div>
         );
     }

@@ -54,4 +54,15 @@ app.post('/api/login', function (req, res) {
     res.send('API is running');
 });
 
+app.get('/api/apl', (req, res) => {
+    var execFile = require('child_process').execFile;
+    const child = 
+    execFile('C:\\Program Files\\Dyalog\\Dyalog APL-64 15.0 Unicode\\dyalog.exe', 
+    ['C:\\Users\\mud\\Desktop\\BondUnit.dws', '-STUDENT_DWS=C:\\Users\\mud\\Desktop\\Bybko_Nataliia.dws', '-STUDENT_NAME=Bybko_Nataliia'], 
+    function (error, stdout, stderr) {
+        console.log("Done APl call");
+        res.send("Done APl call");
+    });
+});
+
 module.exports = app;

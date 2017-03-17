@@ -1,7 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Table, Button, Grid, Row, Col } from 'react-bootstrap';
+import Report from './Report';
 class Main extends React.Component {
+    state = { attempId: undefined }
+    handleClick(attempId) {
+        this.setState({ attempId });
+    }
     render() {
         return (<div>
 
@@ -30,19 +35,19 @@ class Main extends React.Component {
                                     <td>1</td>
                                     <td>21.01.2017 13:00</td>
                                     <td>100%</td>
-                                    <td><Link to="/report/1"><i className="fa fa-table" aria-hidden="true"></i></Link></td>
+                                    <td><a onClick={() => this.handleClick(1)} href="javascript:"><i className="fa fa-table" aria-hidden="true"></i></a></td>
                                 </tr>
                                 <tr>
                                     <td>2</td>
                                     <td>21.01.2017 13:00</td>
                                     <td>15%</td>
-                                    <td><Link to="/report/2"><i className="fa fa-table" aria-hidden="true"></i></Link></td>
+                                    <td><a onClick={() => this.handleClick(2)} href="javascript:"><i className="fa fa-table" aria-hidden="true"></i></a></td>
                                 </tr>
                                 <tr>
                                     <td>3</td>
                                     <td>21.01.2017 13:00</td>
                                     <td>5%</td>
-                                    <td><Link to="/report/3"><i className="fa fa-table" aria-hidden="true"></i></Link></td>
+                                    <td><a onClick={() => this.handleClick(3)} href="javascript:"><i className="fa fa-table" aria-hidden="true"></i></a></td>
                                 </tr>
                             </tbody>
                         </Table>
@@ -51,9 +56,15 @@ class Main extends React.Component {
 
             </Grid>
 
-
-
-
+            {
+                this.state.attempId ?
+                    <Row className="show-grid">
+                        <Col xs={12}>
+                            <Report attemptId={this.state.attempId} />
+                        </Col>
+                    </Row> :
+                    null
+            }
 
         </div>);
     }

@@ -10,6 +10,7 @@ const fs = require('fs');
 const bodyParser = require('body-parser');
 const request = require('request');
 const execFile = require('child_process').execFile;
+const multer = require('multer');
 
 const app = express();
 
@@ -93,6 +94,24 @@ app.get('/api/apl', (req, res) => {
             console.log('Done APl call');
             res.send('Done APl call');
         });
+});
+
+
+// const upload = multer({ dest: 'files/' });
+
+const storage = multer.diskStorage({
+    destination(req, file, cb) {
+        cb(null, 'tmp_uploads/');
+    },
+    filename(req, file, cb) {
+        cb(null, `${Date.now()}.jpg`); // Appending .jpg
+    }
+});
+
+const upload = multer({ storage });
+
+app.post('/api/new-attempt', upload.single('test'), (req, res) => {
+    res.send('done');
 });
 
 module.exports = app;

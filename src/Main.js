@@ -2,12 +2,34 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Table, Button, Grid, Row, Col } from 'react-bootstrap';
 import Report from './Report';
+import DropzoneComponent from 'react-dropzone-component';
+
 class Main extends React.Component {
-    state = { attempId: undefined }
+    constructor() {
+        super();
+        this.state = { attempId: undefined, files: [] };
+    }
+
     handleClick(attempId) {
         this.setState({ attempId });
     }
+    onDrop(files) {
+        this.setState({
+            files: this.state.files.concat(files)
+        });
+    }
     render() {
+        var componentConfig = { postUrl: '/api/new-attempt' };
+        var djsConfig = {
+            autoProcessQueue: true,
+            maxFiles: 1,
+            // acceptedFiles: '.dws',
+            renameFilename: 'test',
+            paramName:'test',
+            dictInvalidFileType: 'Only Dyalog Work Space files (.dws) are allowed!',
+            dictMaxFilesExceeded: 'You can upload only one file for attempt!'
+        }
+        var eventHandlers = { addedfile: (file) => console.log(file) }
         return (<div>
 
             <Grid>
@@ -18,6 +40,14 @@ class Main extends React.Component {
                     <Col xs={2}> <h1><Button bsStyle="primary" className="pull-right text-center" onClick={this.props.onLogout}><i className="fa fa-sign-out" aria-hidden="true"></i> Logout</Button></h1></Col>
                 </Row>
 
+                <Row className="show-grid">
+                    <Col xs={12}>
+                        <DropzoneComponent config={componentConfig}
+                            eventHandlers={eventHandlers}
+                            djsConfig={djsConfig} />
+                        <Button bsStyle="primary" className="pull-right text-center" onClick={this.handleUpload}>Try</Button>
+                    </Col>
+                </Row>
                 <Row className="show-grid">
                     <Col xs={12}>
                         <h1><small>Your attempts to pass tests:</small></h1>

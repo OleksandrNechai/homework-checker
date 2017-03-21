@@ -100,7 +100,7 @@ class App extends Component {
         if (response.status === 'connected') {
             // Logged into your app and Facebook.
             this.testAPI();
-            this.pingServer();
+            //this.pingServer();
         } else if (response.status === 'not_authorized') {
             // The person is logged into Facebook, but not your app.
             console.log('Not authorized');

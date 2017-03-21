@@ -21,21 +21,18 @@ class App extends Component {
     }
 
     pingServer() {
-        this.props.fb.getLoginStatus((response) => {
+        FB.getLoginStatus((response) => {
             if (response.status === 'connected') {
                 const accessToken = response.authResponse.accessToken;
                 if (response.authResponse) {
                     console.log('Welcome!  Fetching your information.... ');
-                    this.props.fb.api('/me', { fields: 'name,email,id' }, function (response) {
+                    FB.api('/me', { fields: 'name,email,id' }, function (response) {
                         console.log('Good to see you, ' + response.name + '.');
-                        fetch('/api/login', {
-                            method: 'POST',
-                            body: JSON.stringify({ ...response, accessToken }),
-                            headers: {
-                                accept: 'application/json',
-                                "content-type": "application/json"
-                            }
-                        }).then(response => console.log(response));
+                        fetch('/api/login/' + accessToken)
+                        .then(r=>r.json())
+                        .then(response => {
+                            console.log(response)
+                        });
                     });
                 }
                 else {
@@ -103,6 +100,7 @@ class App extends Component {
         if (response.status === 'connected') {
             // Logged into your app and Facebook.
             this.testAPI();
+            //this.pingServer();
         } else if (response.status === 'not_authorized') {
             // The person is logged into Facebook, but not your app.
             console.log('Not authorized');
@@ -150,13 +148,6 @@ class App extends Component {
                                         ? <Main onLogout={this.handleLogout.bind(this)} user={this.state.user} />
                                         : <Redirect to="/login" />
                                 )} />
-
-                                <Route path='/report/:attemptId' render={({match}) => (
-                                    this.state.loggedIn
-                                        ? <Report onLogout={this.handleLogout.bind(this)} user={this.state.user} attemptId={match.params.attemptId} />
-                                        : <Redirect to="/login" />
-                                )} />
-
                             </div>
                         </Router>
                 }

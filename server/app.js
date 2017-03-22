@@ -72,7 +72,7 @@ async function fetchUser(accessToken) {
     return user;
 }
 
-async function login(req, res) {
+app.get('/api/login/:accessToken', async (req, res) => {
     const accessToken = req.params.accessToken;
     try {
         const user = await fetchUser(accessToken);
@@ -83,9 +83,20 @@ async function login(req, res) {
     } catch (e) {
         res.status(403).send(`User is not authorized ${e}`);
     }
-}
+});
 
-app.get('/api/login/:accessToken', login);
+async function checkUserAndRunIfOk(req, res, func) {
+    const accessToken = req.params.accessToken;
+    try {
+        const user = await fetchUser(accessToken);
+        if (!user.id) {
+            res.status(403).send('User is not authorized');
+        }
+        func(user);
+    } catch (e) {
+        res.status(403).send(`User is not authorized ${e}`);
+    }
+}
 
 app.get('/api/apl', (req, res) => {
     execFile('C:\\Program Files\\Dyalog\\Dyalog APL-64 15.0 Unicode\\dyalog.exe',
@@ -104,14 +115,33 @@ const storage = multer.diskStorage({
         cb(null, 'tmp_uploads/');
     },
     filename(req, file, cb) {
-        cb(null, `${Date.now()}.jpg`); // Appending .jpg
+        cb(null, 'src.dws'); // Appending .jpg
     }
 });
 
 const upload = multer({ storage });
 
-app.post('/api/new-attempt', upload.single('test'), (req, res) => {
-    res.send('done');
+app.post('/api/new-attempt/:accessToken', upload.single('file'), (req, res) => {
+    checkUserAndRunIfOk(req, res, (user) => {
+        const userDir = `attempts/${user.id}`;
+        const newAttemptDir = `${userDir}/${Date.now()}`;
+        const tempFile = 'tmp_uploads/src.dws';
+
+        if (!fs.existsSync(tempFile)) {
+            res.send('No temp file!');
+            return;
+        }
+
+        if (!fs.existsSync(userDir)) {
+            fs.mkdirSync(userDir);
+            fs.writeFileSync(`${userDir}/user.json`, JSON.stringify(user), 'utf8');
+        }
+
+        fs.mkdirSync(newAttemptDir);
+        fs.createReadStream(tempFile).pipe(fs.createWriteStream(`${newAttemptDir}/src.dws`));
+        fs.unlinkSync(tempFile);
+        res.send('Done!');
+    });
 });
 
 module.exports = app;

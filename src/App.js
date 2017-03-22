@@ -1,16 +1,8 @@
 /*global FB*/
 import React, { Component } from 'react';
-import { Button } from 'react-bootstrap';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import Main from './Main';
 import Login from './Login';
-import Report from './Report';
-
-// interesting SO reagarding implementation http://stackoverflow.com/questions/27717555/implement-facebook-api-login-with-reactjs/31859302;
-
-
-
-
 class App extends Component {
     constructor() {
         super();
@@ -26,13 +18,8 @@ class App extends Component {
                 const accessToken = response.authResponse.accessToken;
                 if (response.authResponse) {
                     console.log('Welcome!  Fetching your information.... ');
-                    FB.api('/me', { fields: 'name,email,id' }, function (response) {
-                        console.log('Good to see you, ' + response.name + '.');
-                        fetch('/api/login/' + accessToken)
-                        .then(r=>r.json())
-                        .then(response => {
-                            console.log(response)
-                        });
+                    FB.api('/me', { fields: 'name,email,id' }, response => {
+                        this.setState({ user: { ...response, accessToken }, loading: false, loggedIn: true });
                     });
                 }
                 else {
@@ -99,8 +86,8 @@ class App extends Component {
         // for FB.getLoginStatus().
         if (response.status === 'connected') {
             // Logged into your app and Facebook.
-            this.testAPI();
-            //this.pingServer();
+            //this.testAPI();
+            this.pingServer();
         } else if (response.status === 'not_authorized') {
             // The person is logged into Facebook, but not your app.
             console.log('Not authorized');

@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Button, Alert } from 'react-bootstrap';
 class FileSelector extends React.Component {
     constructor() {
@@ -13,12 +12,14 @@ class FileSelector extends React.Component {
     render() {
         return (
             <div>
+                {/* This strange doble lable solves Edge crazy bug*/}
                 <label className="btn btn-default btn-file" htmlFor="selectFile">Select .DWS file</label>
                 <input type="file"
                     accept=".dws"
                     name="file"
                     style={{ display: 'none' }} onChange={this.handleFileChange.bind(this)}
                     id="selectFile" />
+                <label htmlFor="inputID"></label>
 
                 {
                     this.state.selectedFilePath

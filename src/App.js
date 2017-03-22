@@ -1,16 +1,8 @@
 /*global FB*/
 import React, { Component } from 'react';
-import { Button } from 'react-bootstrap';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import Main from './Main';
 import Login from './Login';
-import Report from './Report';
-
-// interesting SO reagarding implementation http://stackoverflow.com/questions/27717555/implement-facebook-api-login-with-reactjs/31859302;
-
-
-
-
 class App extends Component {
     constructor() {
         super();

@@ -23,15 +23,34 @@ class Main extends React.Component {
     handleFileSelected(file) {
         let formData = new FormData();
         formData.append('file', file);
-        superagent.post('/api/new-attempt/' + this.props.user.accessToken)
+        superagent.post(`/api/new-attempt/${Date.now()}/${this.props.user.accessToken}`)
             .send(formData)
             .end((err, response) => {
                 if (err) {
                     console.log(err);
                 } else if (response.ok) {
-                    console.log('OK');
+                    this.refreshUser();
+
                 }
             });
+    }
+
+    refreshUser() {
+        fetch('/api/attempts/' + this.props.user.accessToken).then(function (response) {
+            // Convert to JSON
+            return response.json();
+        }).then(j => {
+            // Yay, `j` is a JavaScript object
+            console.log(j);
+            console.log(this.formatTime(j.attempts[0].timeStamp));
+        })
+
+        console.log('OK');
+    }
+
+    formatTime(timeStamp) {
+        const date = new Date(timeStamp);
+        return `${date.toDateString()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
     }
 
     render() {

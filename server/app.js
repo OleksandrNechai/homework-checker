@@ -121,10 +121,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-app.post('/api/new-attempt/:accessToken', upload.single('file'), (req, res) => {
+app.post('/api/new-attempt/:clientTimeStamp/:accessToken', upload.single('file'), (req, res) => {
     checkUserAndRunIfOk(req, res, (user) => {
         const userDir = `attempts/${user.id}`;
-        const newAttemptDir = `${userDir}/${Date.now()}`;
+        const newAttemptDir = `${userDir}/${req.params.clientTimeStamp}`;
         const tempFile = 'tmp_uploads/src.dws';
 
         if (!fs.existsSync(tempFile)) {
@@ -141,6 +141,47 @@ app.post('/api/new-attempt/:accessToken', upload.single('file'), (req, res) => {
         fs.createReadStream(tempFile).pipe(fs.createWriteStream(`${newAttemptDir}/src.dws`));
         fs.unlinkSync(tempFile);
         res.send('Done!');
+    });
+});
+
+app.get('/api/attempts/:accessToken', upload.single('file'), (req, res) => {
+    checkUserAndRunIfOk(req, res, (user) => {
+        const userDir = `attempts/${user.id}`;
+        const userToRetun = user;
+        userToRetun.attempts = [];
+
+        if (!fs.existsSync(userDir)) {
+            res.json(userToRetun);
+            return;
+        }
+        const attemptDirectories = getDirectories(userDir);
+        if (!attemptDirectories.length) {
+            res.json(userToRetun);
+            return;
+        }
+
+        userToRetun.attempts = attemptDirectories.filter(isValidAttempt).map(attemptFromDir);
+        res.json(userToRetun);
+
+        function getDirectories(srcpath) {
+            return fs.readdirSync(srcpath)
+                .filter(file => fs.statSync(path.join(srcpath, file)).isDirectory());
+        }
+
+        function isValidAttempt(dir) {
+            const resultPath = `${userDir}/${dir}/results.json`;
+            return fs.existsSync(resultPath);
+        }
+
+        function attemptFromDir(dir) {
+            const resultPath = `${userDir}/${dir}/results.json`;
+            const timeStamp = Number(dir);
+            const results = JSON.parse(fs.readFileSync(resultPath, 'utf8'));
+            return {
+                timeStamp,
+                results
+            };
+        }
     });
 });
 

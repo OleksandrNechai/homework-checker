@@ -4,8 +4,20 @@
         "import"
     ],
     "rules": {
-        "linebreak-style": ["error", "windows"],
-        "indent": ["error", 4],
-        "comma-dangle":"off"
+        "linebreak-style": [
+            "error",
+            "windows"
+        ],
+        "indent": [
+            "error",
+            4
+        ],
+        "comma-dangle": "off",
+        "no-use-before-define": [
+            "error",
+            {
+                "functions": false
+            }
+        ]
     }
 }

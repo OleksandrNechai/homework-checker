@@ -5,19 +5,27 @@ import FileSelector from './FileSelector.js'
 import superagent from 'superagent'
 
 class Main extends React.Component {
-    constructor() {
-        super();
-        this.state = { attempId: undefined, files: [] };
+    constructor(props) {
+        super(props);
+        this.state = {
+            attempId: undefined,
+            files: [],
+            user: props.user
+        };
+    }
+
+    componentDidMount() {
+        this.updateCurrentlyDisplayedUser();
+    }
+
+    async updateCurrentlyDisplayedUser() {
+        const user = await this.fetchUser();
+        this.setState({ user });
     }
 
     handleClick(e, attempId) {
         e.preventDefault();
         this.setState({ attempId });
-    }
-    onDrop(files) {
-        this.setState({
-            files: this.state.files.concat(files)
-        });
     }
 
     handleFileSelected(file) {
@@ -29,23 +37,15 @@ class Main extends React.Component {
                 if (err) {
                     console.log(err);
                 } else if (response.ok) {
-                    this.refreshUser();
-
+                    this.updateCurrentlyDisplayedUser();
                 }
             });
     }
 
-    refreshUser() {
-        fetch('/api/attempts/' + this.props.user.accessToken).then(function (response) {
-            // Convert to JSON
+    fetchUser() {
+        return fetch('/api/attempts/' + this.props.user.accessToken).then(function (response) {
             return response.json();
-        }).then(j => {
-            // Yay, `j` is a JavaScript object
-            console.log(j);
-            console.log(this.formatTime(j.attempts[0].timeStamp));
-        })
-
-        console.log('OK');
+        });
     }
 
     formatTime(timeStamp) {
@@ -85,37 +85,44 @@ class Main extends React.Component {
                 </Row>
                 <Row className="show-grid">
                     <Col xs={12}>
-                        <h1><small>Your attempts to pass tests:</small></h1>
-                        <Table responsive striped bordered condensed hover>
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>When</th>
-                                    <th>Passed tests</th>
-                                    <th>Detailed report</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>21.01.2017 13:00</td>
-                                    <td>100%</td>
-                                    <td><a onClick={e => this.handleClick(e, 1)} href="#"><i className="fa fa-table" aria-hidden="true"></i></a></td>
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>21.01.2017 13:00</td>
-                                    <td>15%</td>
-                                    <td><a onClick={e => this.handleClick(e, 2)} href="#"><i className="fa fa-table" aria-hidden="true"></i></a></td>
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td>21.01.2017 13:00</td>
-                                    <td>5%</td>
-                                    <td><a onClick={e => this.handleClick(e, 3)} href="#"><i className="fa fa-table" aria-hidden="true"></i></a></td>
-                                </tr>
-                            </tbody>
-                        </Table>
+                        {
+                            this.state.user && this.state.user.attempts && this.state.user.attempts.length ?
+                                <div>
+                                    <h1><small>Your attempts to pass tests:</small></h1>
+                                    <Table responsive striped bordered condensed hover>
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>When</th>
+                                                <th>Passed tests</th>
+                                                <th>Detailed report</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            <tr>
+                                                <td>1</td>
+                                                <td>21.01.2017 13:00</td>
+                                                <td>100%</td>
+                                                <td><a onClick={e => this.handleClick(e, 1)} href="#"><i className="fa fa-table" aria-hidden="true"></i></a></td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>21.01.2017 13:00</td>
+                                                <td>15%</td>
+                                                <td><a onClick={e => this.handleClick(e, 2)} href="#"><i className="fa fa-table" aria-hidden="true"></i></a></td>
+                                            </tr>
+                                            <tr>
+                                                <td>3</td>
+                                                <td>21.01.2017 13:00</td>
+                                                <td>5%</td>
+                                                <td><a onClick={e => this.handleClick(e, 3)} href="#"><i className="fa fa-table" aria-hidden="true"></i></a></td>
+                                            </tr>
+                                        </tbody>
+                                    </Table>
+                                </div>
+                                : <h1><small>You have made no submitions yet</small></h1>
+                        }
                     </Col>
                 </Row>
 

@@ -13,14 +13,16 @@ class App extends Component {
     }
 
     pingServer() {
-        FB.getLoginStatus((response) => {
+        FB.getLoginStatus(async (response) => {
             if (response.status === 'connected') {
                 const accessToken = response.authResponse.accessToken;
                 if (response.authResponse) {
-                    console.log('Welcome!  Fetching your information.... ');
-                    FB.api('/me', { fields: 'name,email,id' }, response => {
-                        this.setState({ user: { ...response, accessToken }, loading: false, loggedIn: true });
-                    });
+                    const user = await this.fetchUser(accessToken);
+                    this.setState({ user, loggedIn: true, loading: false });
+                    // console.log('Welcome!  Fetching your information.... ');
+                    // FB.api('/me', { fields: 'name,email,id' }, response => {
+                    //     this.setState({ user: { ...response, accessToken }, loggedIn: true });
+                    // });
                 }
                 else {
                     console.log("not logged in");
@@ -29,6 +31,11 @@ class App extends Component {
         });
     }
 
+    fetchUser(accessToken) {
+        return fetch('/api/attempts/' + accessToken).then(function (response) {
+            return response.json();
+        });
+    }
 
     //Copy-paste from SO
     componentDidMount() {
@@ -67,15 +74,6 @@ class App extends Component {
         }(document, 'script', 'facebook-jssdk'));
     }
 
-    // Here we run a very simple test of the Graph API after login is
-    // successful.  See statusChangeCallback() for when this call is made.
-    testAPI() {
-        console.log('Welcome!  Fetching your information.... ');
-        FB.api('/me', response => {
-            this.setState({ user: response, loading: false, loggedIn: true });
-        });
-    }
-
     // This is called with the results from from FB.getLoginStatus().
     statusChangeCallback(response) {
         console.log('statusChangeCallback');
@@ -98,6 +96,11 @@ class App extends Component {
             console.log('The person is not logged into Facebook. Please log into Facebook.');
             this.setState({ loggedIn: false, loading: false });
         }
+    }
+
+    async handleUserUpdated() {
+        const user = await this.fetchUser(this.state.user.accessToken);
+        this.setState({ user, loggedIn: true, loading: false });
     }
 
     // This function is called when someone finishes with the Login
@@ -132,7 +135,7 @@ class App extends Component {
 
                                 <Route path='/main' render={() => (
                                     this.state.loggedIn
-                                        ? <Main onLogout={this.handleLogout.bind(this)} user={this.state.user} />
+                                        ? <Main onLogout={this.handleLogout.bind(this)} user={this.state.user} onUserUpdated={this.handleUserUpdated.bind(this)} />
                                         : <Redirect to="/login" />
                                 )} />
                             </div>

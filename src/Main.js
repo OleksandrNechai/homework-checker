@@ -14,15 +14,6 @@ class Main extends React.Component {
         };
     }
 
-    componentDidMount() {
-        this.updateCurrentlyDisplayedUser();
-    }
-
-    async updateCurrentlyDisplayedUser() {
-        const user = await this.fetchUser();
-        this.setState({ user });
-    }
-
     handleClick(e, attempId) {
         e.preventDefault();
         this.setState({ attempId });
@@ -37,20 +28,21 @@ class Main extends React.Component {
                 if (err) {
                     console.log(err);
                 } else if (response.ok) {
-                    this.updateCurrentlyDisplayedUser();
+                    this.props.onUserUpdated();
                 }
             });
     }
 
-    fetchUser() {
-        return fetch('/api/attempts/' + this.props.user.accessToken).then(function (response) {
-            return response.json();
-        });
-    }
 
     formatTime(timeStamp) {
         const date = new Date(timeStamp);
         return `${date.toDateString()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+    }
+
+    passedTestsInPercent(attempt) {
+        const testsCount = attempt.results.length;
+        const passedTestsCount = attempt.results.filter(r => r.maxScore === r.scored).length;
+        return Math.round(passedTestsCount / testsCount * 100);
     }
 
     render() {
@@ -99,25 +91,18 @@ class Main extends React.Component {
                                             </tr>
                                         </thead>
                                         <tbody>
-
-                                            <tr>
-                                                <td>1</td>
-                                                <td>21.01.2017 13:00</td>
-                                                <td>100%</td>
-                                                <td><a onClick={e => this.handleClick(e, 1)} href="#"><i className="fa fa-table" aria-hidden="true"></i></a></td>
-                                            </tr>
-                                            <tr>
-                                                <td>2</td>
-                                                <td>21.01.2017 13:00</td>
-                                                <td>15%</td>
-                                                <td><a onClick={e => this.handleClick(e, 2)} href="#"><i className="fa fa-table" aria-hidden="true"></i></a></td>
-                                            </tr>
-                                            <tr>
-                                                <td>3</td>
-                                                <td>21.01.2017 13:00</td>
-                                                <td>5%</td>
-                                                <td><a onClick={e => this.handleClick(e, 3)} href="#"><i className="fa fa-table" aria-hidden="true"></i></a></td>
-                                            </tr>
+                                            {
+                                                this.state.user.attempts
+                                                    .sort((a1, a2) => a1.timeStamp - a2.timeStamp)
+                                                    .map((attempt, i) => (
+                                                        <tr key={attempt.timeStamp}>
+                                                            <td>{i + 1}</td>
+                                                            <td>{this.formatTime(attempt.timeStamp)}</td>
+                                                            <td>{this.passedTestsInPercent(attempt)}%</td>
+                                                            <td><a onClick={e => this.handleClick(e, 1)} href="#"><i className="fa fa-table" aria-hidden="true"></i></a></td>
+                                                        </tr>
+                                                    ))
+                                            }
                                         </tbody>
                                     </Table>
                                 </div>

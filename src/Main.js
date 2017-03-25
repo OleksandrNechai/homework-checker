@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Button, Grid, Row, Col } from 'react-bootstrap';
+import { Table, Button, Grid, Row, Col, Label } from 'react-bootstrap';
 import Report from './Report';
 import FileSelector from './FileSelector.js'
 import superagent from 'superagent'
@@ -8,15 +8,26 @@ class Main extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            attempId: undefined,
+            attempt: undefined,
             files: [],
             user: props.user
         };
     }
 
-    handleClick(e, attempId) {
+    handleClick(e, attempt) {
         e.preventDefault();
-        this.setState({ attempId });
+        if (this.isCurrentlySelected(attempt))
+            this.setState({ attempt: undefined });
+        else
+            this.setState({ attempt });
+    }
+
+    isCurrentlySelected(attempt) {
+        return this.state.attempt && attempt.timeStamp === this.state.attempt.timeStamp
+    }
+
+    isNew(attempt) {
+        return Date.now() - attempt.timeStamp <= 60;
     }
 
     handleFileSelected(file) {
@@ -33,7 +44,6 @@ class Main extends React.Component {
             });
     }
 
-
     formatTime(timeStamp) {
         const date = new Date(timeStamp);
         return `${date.toDateString()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
@@ -46,6 +56,10 @@ class Main extends React.Component {
     }
 
     render() {
+        const styles = {
+            selectedRow: { backgroundColor: '#cbcbcb', cursor: 'pointer' },
+            row: { cursor: 'pointer' }
+        };
         return (<div>
 
             <Grid>
@@ -93,13 +107,21 @@ class Main extends React.Component {
                                         <tbody>
                                             {
                                                 this.state.user.attempts
-                                                    .sort((a1, a2) => a1.timeStamp - a2.timeStamp)
+                                                    .sort((a1, a2) => a2.timeStamp - a1.timeStamp)
                                                     .map((attempt, i) => (
-                                                        <tr key={attempt.timeStamp}>
+                                                        <tr
+                                                            key={attempt.timeStamp}
+                                                            style={this.isCurrentlySelected(attempt) ? styles.selectedRow : styles.row}
+                                                            onClick={e => this.handleClick(e, attempt)}>
                                                             <td>{i + 1}</td>
-                                                            <td>{this.formatTime(attempt.timeStamp)}</td>
+                                                            <td>
+                                                                {this.formatTime(attempt.timeStamp)}&nbsp;&nbsp;
+                                                                {
+                                                                    this.isNew(attempt) ? <Label bsStyle="default">new</Label> : null
+                                                                }
+                                                            </td>
                                                             <td>{this.passedTestsInPercent(attempt)}%</td>
-                                                            <td><a onClick={e => this.handleClick(e, 1)} href="#"><i className="fa fa-table" aria-hidden="true"></i></a></td>
+                                                            <td><a onClick={e => this.handleClick(e, attempt)} href="#"><i className="fa fa-table" aria-hidden="true"></i></a></td>
                                                         </tr>
                                                     ))
                                             }
@@ -114,10 +136,10 @@ class Main extends React.Component {
             </Grid>
 
             {
-                this.state.attempId ?
+                this.state.attempt ?
                     <Row className="show-grid">
                         <Col xs={12}>
-                            <Report attemptId={this.state.attempId} />
+                            <Report results={this.state.attempt.results} date={this.formatTime(this.state.attempt.timeStamp)} />
                         </Col>
                     </Row> :
                     null

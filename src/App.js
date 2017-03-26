@@ -3,6 +3,8 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import Main from './Main';
 import Login from './Login';
+import 'react-notifications/lib/notifications.css';
+import { NotificationContainer, NotificationManager } from 'react-notifications';
 class App extends Component {
     constructor() {
         super();
@@ -21,10 +23,6 @@ class App extends Component {
                     const user = await this.fetchUser(accessToken);
                     user.accessToken = accessToken;
                     this.setState({ user, loggedIn: true, loading: false });
-                    // console.log('Welcome!  Fetching your information.... ');
-                    // FB.api('/me', { fields: 'name,email,id' }, response => {
-                    //     this.setState({ user: { ...response, accessToken }, loggedIn: true });
-                    // });
                 }
                 else {
                     console.log("not logged in");
@@ -99,8 +97,7 @@ class App extends Component {
             this.setState({ loggedIn: false, loading: false });
         }
     }
-
-    async handleUserUpdated() {
+    async handleTestingFinished() {
         const user = await this.fetchUser(this.state.user.accessToken);
         user.accessToken = this.state.user.accessToken;
         this.setState({
@@ -109,8 +106,9 @@ class App extends Component {
             loading: false,
             isExecutingTests: false
         });
-    }
 
+        NotificationManager.success('Done!');
+    }
     handleTestingStarted() {
         this.setState({ isExecutingTests: true });
     }
@@ -147,12 +145,15 @@ class App extends Component {
 
                                 <Route path='/main' render={() => (
                                     this.state.loggedIn
-                                        ? <Main
-                                            onLogout={this.handleLogout.bind(this)}
-                                            user={this.state.user}
-                                            isExecutingTests={this.state.isExecutingTests}
-                                            onTestingStarted={this.handleTestingStarted.bind(this)}
-                                            onTestingFinished={this.handleUserUpdated.bind(this)} />
+                                        ? <div>
+                                            <Main
+                                                onLogout={this.handleLogout.bind(this)}
+                                                user={this.state.user}
+                                                isExecutingTests={this.state.isExecutingTests}
+                                                onTestingStarted={this.handleTestingStarted.bind(this)}
+                                                onTestingFinished={this.handleTestingFinished.bind(this)} />
+                                            <NotificationContainer />
+                                        </div>
                                         : <Redirect to="/login" />
                                 )} />
                             </div>

@@ -37,10 +37,10 @@ class Main extends React.Component {
         superagent.post(`/api/new-attempt/${Date.now()}/${this.props.user.accessToken}`)
             .send(formData)
             .end((err, response) => {
+                this.setState({ isExecutingTests: false });
                 if (err) {
                     console.log(err);
                 } else if (response.ok) {
-                    this.setState({ isExecutingTests: false });
                     this.props.onUserUpdated();
                 }
             });

@@ -138,10 +138,12 @@ app.post('/api/new-attempt/:clientTimeStamp/:accessToken', upload.single('file')
         }
 
         fs.mkdirSync(newAttemptDir);
-        fs.createReadStream(tempFile).pipe(fs.createWriteStream(`${newAttemptDir}/src.dws`));
-        fs.unlinkSync(tempFile);
-        invokeApl(newAttemptDir);
-        res.send('Done!');
+        const stream = fs.createReadStream(tempFile).pipe(fs.createWriteStream(`${newAttemptDir}/src.dws`));
+        stream.on('finish', () => {
+            fs.unlinkSync(tempFile);
+            invokeApl(newAttemptDir);
+            res.send('Done!');
+        });
     });
 });
 
@@ -178,7 +180,16 @@ app.get('/api/attempts/:accessToken', upload.single('file'), (req, res) => {
 
         function isValidAttempt(dir) {
             const resultPath = `${userDir}/${dir}/results.json`;
-            return fs.existsSync(resultPath);
+            return fs.existsSync(resultPath) && isJson(fs.readFileSync(resultPath));
+
+            function isJson(str) {
+                try {
+                    JSON.parse(str);
+                } catch (e) {
+                    return false;
+                }
+                return true;
+            }
         }
 
         function attemptFromDir(dir) {

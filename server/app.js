@@ -94,7 +94,7 @@ async function checkUserAndRunIfOk(req, res, func) {
         }
         func(user);
     } catch (e) {
-        res.status(403).send(`User is not authorized ${e}`);
+        res.status(403).send(`User is not authorized or runtime error occured: ${e}`);
     }
 }
 
@@ -140,9 +140,17 @@ app.post('/api/new-attempt/:clientTimeStamp/:accessToken', upload.single('file')
         fs.mkdirSync(newAttemptDir);
         fs.createReadStream(tempFile).pipe(fs.createWriteStream(`${newAttemptDir}/src.dws`));
         fs.unlinkSync(tempFile);
+        invokeApl(newAttemptDir);
         res.send('Done!');
     });
 });
+
+const mode = 'fake';
+function invokeApl(newAttemptDir) {
+    if (mode === 'fake') {
+        fs.createReadStream('apl/results.json').pipe(fs.createWriteStream(`${newAttemptDir}/results.json`));
+    }
+}
 
 app.get('/api/attempts/:accessToken', upload.single('file'), (req, res) => {
     checkUserAndRunIfOk(req, res, (user) => {

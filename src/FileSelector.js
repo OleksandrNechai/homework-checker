@@ -8,7 +8,10 @@ class FileSelector extends React.Component {
     handleFileChange(e) {
         this.setState({ selectedFilePath: e.currentTarget.value, selectedFile: e.currentTarget.files[0] });
     }
-
+    handleFileSelected() {
+        this.props.onSelected(this.state.selectedFile);
+        this.setState({ selectedFilePath: '' });
+    }
     render() {
         return (
             <div>
@@ -18,7 +21,8 @@ class FileSelector extends React.Component {
                     accept=".dws"
                     name="file"
                     style={{ display: 'none' }} onChange={this.handleFileChange.bind(this)}
-                    id="selectFile" />
+                    id="selectFile"
+                    value={this.state.selectedFilePath} />
                 <label htmlFor="inputID"></label>
 
                 {
@@ -28,7 +32,7 @@ class FileSelector extends React.Component {
                             <Alert bsStyle="info" style={{ marginTop: "10px", marginBottom: "10px" }}>
                                 <strong>The file is about to be sent for testing:</strong> {this.state.selectedFilePath}
                             </Alert>
-                            <Button bsStyle="primary" onClick={() => this.props.onSelected(this.state.selectedFile)}>TEST IT!</Button>
+                            <Button bsStyle="primary" onClick={this.handleFileSelected.bind(this)}>TEST IT!</Button>
                         </div>
                         : null
                 }

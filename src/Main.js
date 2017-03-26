@@ -1,16 +1,16 @@
 import React from 'react';
 import { Table, Button, Grid, Row, Col, Label } from 'react-bootstrap';
 import Report from './Report';
-import FileSelector from './FileSelector.js'
-import superagent from 'superagent'
+import LoadingProgress from './LoadingProgress';
+import FileSelector from './FileSelector.js';
+import superagent from 'superagent';
 
 class Main extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             attempt: undefined,
-            files: [],
-            user: props.user
+            isExecutingTests: false
         };
     }
 
@@ -27,10 +27,11 @@ class Main extends React.Component {
     }
 
     isNew(attempt) {
-        return Date.now() - attempt.timeStamp <= 60;
+        return Date.now() - attempt.timeStamp <= 60 * 1000;
     }
 
     handleFileSelected(file) {
+        this.setState({ isExecutingTests: true });
         let formData = new FormData();
         formData.append('file', file);
         superagent.post(`/api/new-attempt/${Date.now()}/${this.props.user.accessToken}`)
@@ -39,6 +40,7 @@ class Main extends React.Component {
                 if (err) {
                     console.log(err);
                 } else if (response.ok) {
+                    this.setState({ isExecutingTests: false });
                     this.props.onUserUpdated();
                 }
             });
@@ -73,26 +75,13 @@ class Main extends React.Component {
                 <Row className="show-grid">
                     <Col xs={12}>
                         <FileSelector onSelected={this.handleFileSelected.bind(this)} />
-
-                        {/*
-                        <DropzoneComponent config={componentConfig}
-                            eventHandlers={eventHandlers}
-                            djsConfig={djsConfig} />
-
-                        <FileUploadProgress key='ex1' url='http://localhost:3000/api/upload'
-                            onProgress={(e, request, progress) => { console.log('progress', e, request, progress); }}
-                            onLoad={(e, request) => { console.log('load', e, request); }}
-                            onError={(e, request) => { console.log('error', e, request); }}
-                            onAbort={(e, request) => { console.log('abort', e, request); }}
-                        />
-                        */}
-
+                        {this.state.isExecutingTests ? <LoadingProgress /> : null}
                     </Col>
                 </Row>
                 <Row className="show-grid">
                     <Col xs={12}>
                         {
-                            this.state.user && this.state.user.attempts && this.state.user.attempts.length ?
+                            this.props.user && this.props.user.attempts && this.props.user.attempts.length ?
                                 <div>
                                     <h1><small>Your attempts to pass tests:</small></h1>
                                     <Table responsive striped bordered condensed hover>
@@ -106,7 +95,7 @@ class Main extends React.Component {
                                         </thead>
                                         <tbody>
                                             {
-                                                this.state.user.attempts
+                                                this.props.user.attempts
                                                     .sort((a1, a2) => a2.timeStamp - a1.timeStamp)
                                                     .map((attempt, i) => (
                                                         <tr

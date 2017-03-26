@@ -18,6 +18,7 @@ class App extends Component {
                 const accessToken = response.authResponse.accessToken;
                 if (response.authResponse) {
                     const user = await this.fetchUser(accessToken);
+                    user.accessToken = accessToken;
                     this.setState({ user, loggedIn: true, loading: false });
                     // console.log('Welcome!  Fetching your information.... ');
                     // FB.api('/me', { fields: 'name,email,id' }, response => {
@@ -100,7 +101,8 @@ class App extends Component {
 
     async handleUserUpdated() {
         const user = await this.fetchUser(this.state.user.accessToken);
-        this.setState({ user, loggedIn: true, loading: false });
+        user.accessToken = this.state.user.accessToken;
+        this.setState({ user: { ...user, attempts: user.attempts }, loggedIn: true, loading: false });
     }
 
     // This function is called when someone finishes with the Login

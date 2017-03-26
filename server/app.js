@@ -141,17 +141,27 @@ app.post('/api/new-attempt/:clientTimeStamp/:accessToken', upload.single('file')
         const stream = fs.createReadStream(tempFile).pipe(fs.createWriteStream(`${newAttemptDir}/src.dws`));
         stream.on('finish', () => {
             fs.unlinkSync(tempFile);
-            invokeApl(newAttemptDir);
-            res.send('Done!');
+            invokeApl(newAttemptDir).then(() => res.send('Done!'));
         });
     });
 });
 
 const mode = 'fake';
 function invokeApl(newAttemptDir) {
-    if (mode === 'fake') {
-        fs.createReadStream('apl/results.json').pipe(fs.createWriteStream(`${newAttemptDir}/results.json`));
-    }
+    return new Promise((resolve, reject) => {
+        if (mode === 'fake') {
+            try {
+                const stream = fs.createReadStream('apl/results.json').pipe(fs.createWriteStream(`${newAttemptDir}/results.json`));
+                stream.on('finish', () => {
+                    resolve();
+                });
+            } catch (e) {
+                reject();
+            }
+        } else {
+            resolve();
+        }
+    });
 }
 
 app.get('/api/attempts/:accessToken', upload.single('file'), (req, res) => {

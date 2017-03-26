@@ -15,7 +15,7 @@ class App extends Component {
         };
     }
 
-    pingServer() {
+    loadUser() {
         FB.getLoginStatus(async (response) => {
             if (response.status === 'connected') {
                 const accessToken = response.authResponse.accessToken;
@@ -25,16 +25,29 @@ class App extends Component {
                     this.setState({ user, loggedIn: true, loading: false });
                 }
                 else {
-                    console.log("not logged in");
+                    NotificationManager.error(
+                        'The person is not logged into Facebook. Please log into Facebook.', 'Login problem.', 60 * 1000);
                 }
             }
         });
     }
 
+
     fetchUser(accessToken) {
-        return fetch('/api/attempts/' + accessToken).then(function (response) {
-            return response.json();
-        });
+        return fetch('/api/attempts/' + accessToken)
+            .then(handleErrors)
+            .then(function (response) {
+                return response.json();
+            });
+
+        function handleErrors(response) {
+            if (!response.ok) {
+                NotificationManager.error(
+                    'Try once again later. If the problem persists, please contact your teacher.', 'Fetching user data failed.', 60 * 1000);
+                throw Error(response.statusText);
+            }
+            return response;
+        }
     }
 
     //Copy-paste from SO
@@ -76,24 +89,20 @@ class App extends Component {
 
     // This is called with the results from from FB.getLoginStatus().
     statusChangeCallback(response) {
-        console.log('statusChangeCallback');
-        console.log(response);
-        // The response object is returned with a status field that lets the
-        // app know the current login status of the person.
-        // Full docs on the response object can be found in the documentation
-        // for FB.getLoginStatus().
         if (response.status === 'connected') {
             // Logged into your app and Facebook.
             //this.testAPI();
-            this.pingServer();
+            this.loadUser();
         } else if (response.status === 'not_authorized') {
             // The person is logged into Facebook, but not your app.
-            console.log('Not authorized');
+            NotificationManager.error(
+                'Not authorized.', 'Not authorized.', 60 * 1000);
             this.setState({ loggedIn: false, loading: false });
         } else {
             // The person is not logged into Facebook, so we're not sure if
             // they are logged into this app or not.
-            console.log('The person is not logged into Facebook. Please log into Facebook.');
+            NotificationManager.error(
+                'The person is not logged into Facebook. Please log into Facebook.', 'Login problem.', 60 * 1000);
             this.setState({ loggedIn: false, loading: false });
         }
     }
@@ -103,11 +112,17 @@ class App extends Component {
         this.setState({
             user: { ...user, attempts: user.attempts },
             loggedIn: true,
-            loading: false,
             isExecutingTests: false
         });
 
         NotificationManager.success('Done!');
+    }
+    handleTestingFailed() {
+        this.setState({
+            isExecutingTests: false
+        });
+        NotificationManager.error(
+            'Try once again later. If the problem persists, please contact your teacher.', 'Sorry, our server is in trouble.', 60 * 1000);
     }
     handleTestingStarted() {
         this.setState({ isExecutingTests: true });
@@ -151,14 +166,15 @@ class App extends Component {
                                                 user={this.state.user}
                                                 isExecutingTests={this.state.isExecutingTests}
                                                 onTestingStarted={this.handleTestingStarted.bind(this)}
-                                                onTestingFinished={this.handleTestingFinished.bind(this)} />
-                                            <NotificationContainer />
+                                                onTestingFinished={this.handleTestingFinished.bind(this)}
+                                                onTestingFailed={this.handleTestingFailed.bind(this)} />
                                         </div>
                                         : <Redirect to="/login" />
                                 )} />
                             </div>
                         </Router>
                 }
+                <NotificationContainer />
             </div>
         );
     }

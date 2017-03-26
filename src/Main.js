@@ -37,7 +37,7 @@ class Main extends React.Component {
             .send(formData)
             .end((err, response) => {
                 if (err) {
-                    console.log(err);
+                    this.props.onTestingFailed(err);
                 } else if (response.ok) {
                     this.props.onTestingFinished();
                 }

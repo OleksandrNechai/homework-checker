@@ -25,8 +25,7 @@ class App extends Component {
                     this.setState({ user, loggedIn: true, loading: false });
                 }
                 else {
-                    NotificationManager.error(
-                        'The person is not logged into Facebook. Please log into Facebook.', 'Login problem.', 60 * 1000);
+                    this.setState({ loggedIn: false, loading: false });
                 }
             }
         });
@@ -101,8 +100,6 @@ class App extends Component {
         } else {
             // The person is not logged into Facebook, so we're not sure if
             // they are logged into this app or not.
-            NotificationManager.error(
-                'The person is not logged into Facebook. Please log into Facebook.', 'Login problem.', 60 * 1000);
             this.setState({ loggedIn: false, loading: false });
         }
     }

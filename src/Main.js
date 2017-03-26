@@ -9,8 +9,7 @@ class Main extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            attempt: undefined,
-            isExecutingTests: false
+            attempt: undefined
         };
     }
 
@@ -31,24 +30,26 @@ class Main extends React.Component {
     }
 
     handleFileSelected(file) {
-        this.setState({ isExecutingTests: true });
+        this.props.onTestingStarted();
         let formData = new FormData();
         formData.append('file', file);
         superagent.post(`/api/new-attempt/${Date.now()}/${this.props.user.accessToken}`)
             .send(formData)
             .end((err, response) => {
-                this.setState({ isExecutingTests: false });
                 if (err) {
                     console.log(err);
                 } else if (response.ok) {
-                    this.props.onUserUpdated();
+                    this.props.onTestingFinished();
                 }
             });
     }
 
     formatTime(timeStamp) {
         const date = new Date(timeStamp);
-        return `${date.toDateString()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+        return `${date.toDateString()} ${twoDigits(date.getHours())}:${twoDigits(date.getMinutes())}:${twoDigits(date.getSeconds())}`;
+        function twoDigits(n) {
+            return ("0" + n).slice(-2);
+        }
     }
 
     passedTestsInPercent(attempt) {
@@ -75,7 +76,7 @@ class Main extends React.Component {
                 <Row className="show-grid">
                     <Col xs={12}>
                         <FileSelector onSelected={this.handleFileSelected.bind(this)} />
-                        {this.state.isExecutingTests ? <LoadingProgress /> : null}
+                        {this.props.isExecutingTests ? <LoadingProgress /> : null}
                     </Col>
                 </Row>
                 <Row className="show-grid">

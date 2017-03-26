@@ -8,7 +8,8 @@ class App extends Component {
         super();
         this.state = {
             loggedIn: false,
-            loading: true
+            loading: true,
+            isExecutingTests: false
         };
     }
 
@@ -102,7 +103,16 @@ class App extends Component {
     async handleUserUpdated() {
         const user = await this.fetchUser(this.state.user.accessToken);
         user.accessToken = this.state.user.accessToken;
-        this.setState({ user: { ...user, attempts: user.attempts }, loggedIn: true, loading: false });
+        this.setState({
+            user: { ...user, attempts: user.attempts },
+            loggedIn: true,
+            loading: false,
+            isExecutingTests: false
+        });
+    }
+
+    handleTestingStarted() {
+        this.setState({ isExecutingTests: true });
     }
 
     // This function is called when someone finishes with the Login
@@ -137,7 +147,12 @@ class App extends Component {
 
                                 <Route path='/main' render={() => (
                                     this.state.loggedIn
-                                        ? <Main onLogout={this.handleLogout.bind(this)} user={this.state.user} onUserUpdated={this.handleUserUpdated.bind(this)} />
+                                        ? <Main
+                                            onLogout={this.handleLogout.bind(this)}
+                                            user={this.state.user}
+                                            isExecutingTests={this.state.isExecutingTests}
+                                            onTestingStarted={this.handleTestingStarted.bind(this)}
+                                            onTestingFinished={this.handleUserUpdated.bind(this)} />
                                         : <Redirect to="/login" />
                                 )} />
                             </div>

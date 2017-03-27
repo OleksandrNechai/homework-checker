@@ -98,16 +98,6 @@ async function checkUserAndRunIfOk(req, res, func) {
     }
 }
 
-app.get('/api/apl', (req, res) => {
-    execFile('C:\\Program Files\\Dyalog\\Dyalog APL-64 15.0 Unicode\\dyalog.exe',
-        ['C:\\Users\\mud\\Desktop\\BondUnit.dws', '-STUDENT_DWS=C:\\Users\\mud\\Desktop\\Bybko_Nataliia.dws', '-STUDENT_NAME=Bybko_Nataliia'],
-        () => {
-            console.log('Done APl call');
-            res.send('Done APl call');
-        });
-});
-
-
 // const upload = multer({ dest: 'files/' });
 
 const storage = multer.diskStorage({
@@ -159,6 +149,13 @@ function invokeApl(newAttemptDir) {
                 reject();
             }
         } else {
+            var execFile = require('child_process').execFile;
+            const child =
+                execFile('C:\\Program Files\\Dyalog\\Dyalog APL-64 15.0 Unicode\\dyalog.exe',
+                    ['C:\\Users\\mud\\Desktop\\BondUnitJson.dws', '-STUDENT_PATH='+`${newAttemptDir}`],
+                    function (error, stdout, stderr) {
+                        console.log("Done APL call");                       
+                    });
             resolve();
         }
     });

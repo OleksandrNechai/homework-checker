@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, Alert } from 'react-bootstrap';
+import { NotificationContainer, NotificationManager } from 'react-notifications';
 class FileSelector extends React.Component {
     constructor() {
         super();
@@ -9,8 +10,19 @@ class FileSelector extends React.Component {
         this.setState({ selectedFilePath: e.currentTarget.value, selectedFile: e.currentTarget.files[0] });
     }
     handleFileSelected() {
-        this.props.onSelected(this.state.selectedFile);
+        var extension = getExtension(this.state.selectedFile.name);
+        if (/(dws|DWS)$/ig.test(extension)) {
+            this.props.onSelected(this.state.selectedFile);
+        } else {
+            NotificationManager.error(
+                'Only .DWS files are allowed.', 'Wrong extension file.', 60 * 1000);
+        }
         this.setState({ selectedFilePath: '' });
+
+        function getExtension(filename) {
+            var parts = filename.split('.');
+            return parts[parts.length - 1];
+        }
     }
     render() {
         return (
@@ -36,7 +48,7 @@ class FileSelector extends React.Component {
                         </div>
                         : null
                 }
-
+                <NotificationContainer />
             </div>
         );
     }

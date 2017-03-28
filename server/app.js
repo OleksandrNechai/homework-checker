@@ -131,35 +131,12 @@ app.post('/api/new-attempt/:clientTimeStamp/:accessToken', upload.single('file')
         const stream = fs.createReadStream(tempFile).pipe(fs.createWriteStream(`${newAttemptDir}/src.dws`));
         stream.on('finish', () => {
             fs.unlinkSync(tempFile);
-            invokeApl(newAttemptDir).then(() => res.send('Done!'));
+            invokeApl(newAttemptDir).then(() => res.send('Done!'));        
         });
     });
 });
 
-const mode = 'fake';
-function invokeApl(newAttemptDir) {
-    return new Promise((resolve, reject) => {
-        if (mode === 'fake') {
-            try {
-                const stream = fs.createReadStream('apl/results.json').pipe(fs.createWriteStream(`${newAttemptDir}/results.json`));
-                stream.on('finish', () => {
-                    resolve();
-                });
-            } catch (e) {
-                reject();
-            }
-        } else {
-            var execFile = require('child_process').execFile;
-            const child =
-                execFile('C:\\Program Files\\Dyalog\\Dyalog APL-64 15.0 Unicode\\dyalog.exe',
-                    ['C:\\Users\\mud\\Desktop\\BondUnitJson.dws', '-STUDENT_PATH='+`${newAttemptDir}`],
-                    function (error, stdout, stderr) {
-                        console.log("Done APL call");                       
-                    });
-            resolve();
-        }
-    });
-}
+
 
 app.get('/api/attempts/:accessToken', upload.single('file'), (req, res) => {
     checkUserAndRunIfOk(req, res, (user) => {

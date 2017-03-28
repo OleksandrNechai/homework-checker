@@ -21,6 +21,7 @@ app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:htt
 app.use(express.static(path.resolve(__dirname, '..', 'build')));
 
 
+
 app.use(bodyParser.json());       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true,
@@ -152,9 +153,9 @@ function invokeApl(newAttemptDir) {
             var execFile = require('child_process').execFile;
             const child =
                 execFile('C:\\Program Files\\Dyalog\\Dyalog APL-64 15.0 Unicode\\dyalog.exe',
-                    ['C:\\Users\\mud\\Desktop\\BondUnitJson.dws', '-STUDENT_PATH='+`${newAttemptDir}`],
+                    ['C:\\Users\\mud\\Desktop\\BondUnitJson.dws', '-STUDENT_PATH=' + `${newAttemptDir}`],
                     function (error, stdout, stderr) {
-                        console.log("Done APL call");                       
+                        console.log("Done APL call");
                     });
             resolve();
         }
@@ -210,5 +211,11 @@ app.get('/api/attempts/:accessToken', upload.single('file'), (req, res) => {
         }
     });
 });
+
+// Always return the main index.html, so react-router render the route in the client
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '..', 'build', 'index.html'));
+});
+
 
 module.exports = app;

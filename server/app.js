@@ -82,7 +82,7 @@ app.get('/api/login/:accessToken', async (req, res) => {
         }
         res.json(user);
     } catch (e) {
-        res.status(403).send(`User is not authorized ${e}`);
+        res.status(403).send('User fetching from Facebook failed. Facebook changed its API again?');
     }
 });
 

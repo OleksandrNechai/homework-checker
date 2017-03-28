@@ -62,10 +62,10 @@ function _request(url) {
 }
 
 async function fetchUser(accessToken) {
-    const appAccessToken = await _request(
-        `https://graph.facebook.com/oauth/access_token?client_id=${config.appId}&client_secret=${config.appSecret}&grant_type=client_credentials`);
+    const oauth = await _request(
+        `https://graph.facebook.com/v2.8/oauth/access_token?client_id=${config.appId}&client_secret=${config.appSecret}&grant_type=client_credentials`);
     const debug = await _request(
-        `https://graph.facebook.com/debug_token?input_token=${accessToken}&${appAccessToken}`);
+        `https://graph.facebook.com/v2.8/debug_token?input_token=${accessToken}&access_token=${oauth.access_token}`);
     const userId = debug.data.user_id;
     const user = await _request(
         `https://graph.facebook.com/v2.8/${userId}?access_token=${accessToken}&fields=id,name,email`);

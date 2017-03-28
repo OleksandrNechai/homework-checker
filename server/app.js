@@ -21,6 +21,7 @@ app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:htt
 app.use(express.static(path.resolve(__dirname, '..', 'build')));
 
 
+
 app.use(bodyParser.json());       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true,
@@ -62,10 +63,10 @@ function _request(url) {
 }
 
 async function fetchUser(accessToken) {
-    const appAccessToken = await _request(
-        `https://graph.facebook.com/oauth/access_token?client_id=${config.appId}&client_secret=${config.appSecret}&grant_type=client_credentials`);
+    const oauth = await _request(
+        `https://graph.facebook.com/v2.8/oauth/access_token?client_id=${config.appId}&client_secret=${config.appSecret}&grant_type=client_credentials`);
     const debug = await _request(
-        `https://graph.facebook.com/debug_token?input_token=${accessToken}&${appAccessToken}`);
+        `https://graph.facebook.com/v2.8/debug_token?input_token=${accessToken}&access_token=${oauth.access_token}`);
     const userId = debug.data.user_id;
     const user = await _request(
         `https://graph.facebook.com/v2.8/${userId}?access_token=${accessToken}&fields=id,name,email`);
@@ -81,7 +82,7 @@ app.get('/api/login/:accessToken', async (req, res) => {
         }
         res.json(user);
     } catch (e) {
-        res.status(403).send(`User is not authorized ${e}`);
+        res.status(403).send('User fetching from Facebook failed. Facebook changed its API again?');
     }
 });
 
@@ -136,8 +137,6 @@ app.post('/api/new-attempt/:clientTimeStamp/:accessToken', upload.single('file')
     });
 });
 
-
-
 app.get('/api/attempts/:accessToken', upload.single('file'), (req, res) => {
     checkUserAndRunIfOk(req, res, (user) => {
         const userDir = `attempts/${user.id}`;
@@ -187,5 +186,11 @@ app.get('/api/attempts/:accessToken', upload.single('file'), (req, res) => {
         }
     });
 });
+
+// Always return the main index.html, so react-router render the route in the client
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '..', 'build', 'index.html'));
+});
+
 
 module.exports = app;

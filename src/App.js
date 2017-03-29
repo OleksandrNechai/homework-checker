@@ -118,7 +118,9 @@ class App extends Component {
             isExecutingTests: false
         });
         NotificationManager.error(
-            'Try once again later. If the problem persists, please contact your teacher.', 'Sorry, our server is in trouble.', 60 * 1000);
+            'Try once again later. Also, ensure your .DWS file is valid. ' +
+            'If the problem persists, please contact your teacher (mud@simcorp.com or nechais@gmail.com).',
+            'Sorry, our server has troubles processing your request.', 60 * 1000);
     }
     handleTestingStarted() {
         this.setState({ isExecutingTests: true });

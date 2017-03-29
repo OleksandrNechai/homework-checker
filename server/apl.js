@@ -18,6 +18,9 @@ function invokeApl(newAttemptDir) {
                         console.log('APL call failed');
                         reject(error);
                     } else {
+                        if (!fs.existsSync(`${newAttemptDir}/results.json`)) {
+                            reject('Not test results! Input file format must be incorrect.');
+                        }
                         console.log('APL call succeed');
                         resolve();
                     }

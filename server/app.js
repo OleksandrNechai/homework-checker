@@ -9,8 +9,8 @@ const path = require('path');
 const fs = require('fs');
 const bodyParser = require('body-parser');
 const request = require('request');
-const execFile = require('child_process').execFile;
 const multer = require('multer');
+const invokeApl = require('./apl.js').invokeApl;
 
 const app = express();
 
@@ -132,7 +132,9 @@ app.post('/api/new-attempt/:clientTimeStamp/:accessToken', upload.single('file')
         const stream = fs.createReadStream(tempFile).pipe(fs.createWriteStream(`${newAttemptDir}/src.dws`));
         stream.on('finish', () => {
             fs.unlinkSync(tempFile);
-            invokeApl(newAttemptDir).then(() => res.send('Done!'));        
+            invokeApl(newAttemptDir)
+                .then(() => res.send('Done!'))
+                .catch(() => res.status(500).send('Tryed to to invoke APL for running tests, but Dyalog APL failed'));
         });
     });
 });

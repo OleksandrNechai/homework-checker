@@ -10,6 +10,13 @@
             "name": "Launch Server on 3001",
             "program": "${workspaceRoot}/server/index.js",
             "cwd": "${workspaceRoot}"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "apl",
+            "program": "${workspaceRoot}/server/apl-call-tester.js",
+            "cwd": "${workspaceRoot}"
         }
     ]
 }

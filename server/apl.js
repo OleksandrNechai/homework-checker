@@ -7,6 +7,10 @@ const config = JSON.parse(fs.readFileSync(`${__dirname}/config.json`));
 function invokeApl(newAttemptDir) {
     return new Promise((resolve, reject) => {
         try {
+            console.log('Calling APL');
+            console.log(`Dyalog path: ${config.dyalogPath}`);
+            console.log(`Tests path: ${config.unitTestsPath}`);
+            console.log(`-STUDENT_PATH=${newAttemptDir}`);
             execFile(config.dyalogPath,
                 [config.unitTestsPath, `-STUDENT_PATH=${newAttemptDir}`],
                 (error) => {

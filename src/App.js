@@ -93,8 +93,6 @@ class App extends Component {
             this.loadUser();
         } else if (response.status === 'not_authorized') {
             // The person is logged into Facebook, but not your app.
-            NotificationManager.error(
-                'Not authorized.', 'Not authorized.', 60 * 1000);
             this.setState({ loggedIn: false, loading: false });
         } else {
             // The person is not logged into Facebook, so we're not sure if

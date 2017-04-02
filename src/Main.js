@@ -53,9 +53,9 @@ class Main extends React.Component {
     }
 
     passedTestsInPercent(attempt) {
-        const testsCount = attempt.results.length;
-        const passedTestsCount = attempt.results.filter(r => r.maxScore === r.scored).length;
-        return Math.round(passedTestsCount / testsCount * 100);
+        const score = attempt.results.map(r => r.scored).reduce((x, y) => x + y, 0);
+        const maxScore = attempt.results.map(r => r.maxScore).reduce((x, y) => x + y, 0);
+        return Math.round(score / maxScore * 100);
     }
 
     render() {
